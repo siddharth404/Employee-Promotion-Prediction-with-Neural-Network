@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
@@ -45,7 +46,29 @@ model = build_model()
 # Streamlit app
 st.title("Employee Promotion Prediction")
 
-# Collect user inputs
+# EDA - Show visualizations
+st.header("Exploratory Data Analysis (EDA)")
+
+# Count plot for promotions
+st.subheader("Promotion Count")
+plt.figure(figsize=(10, 5))
+sns.countplot(x='is_promoted', data=train_data, palette="Blues")
+st.pyplot(plt.gcf())
+
+# Count plot for recruitment channel vs. promotion
+st.subheader("Recruitment Channel vs Promotion")
+plt.figure(figsize=(10, 5))
+sns.countplot(x='recruitment_channel', hue='is_promoted', data=train_data, palette="Oranges")
+st.pyplot(plt.gcf())
+
+# Distribution of Average Training Score
+st.subheader("Distribution of Average Training Score")
+plt.figure(figsize=(10, 5))
+sns.histplot(train_data['avg_training_score'], kde=True, color='green')
+st.pyplot(plt.gcf())
+
+# Collect user inputs for prediction
+st.header("Predict Employee Promotion")
 gender = st.selectbox("Gender", ["Male", "Female"])
 department = st.selectbox("Department", train_data['department'].unique())
 region = st.selectbox("Region", train_data['region'].unique())
