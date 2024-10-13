@@ -6,7 +6,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense, Dropout, Input
 from keras.optimizers import Adam
 import numpy as np
 
@@ -39,7 +39,8 @@ X_train, X_val, y_train, y_val = train_test_split(train_data_x, train_data_y, te
 # Build the Neural Network model
 def build_model():
     model = Sequential()
-    model.add(Dense(8, input_shape=(11,), activation='relu'))
+    model.add(Input(shape=(11,)))  # Use Input layer here
+    model.add(Dense(8, activation='relu'))
     model.add(Dropout(0.3))
     model.add(Dense(1, activation='sigmoid'))
     
@@ -112,15 +113,15 @@ input_data = pd.DataFrame({
 
 # Predict promotion
 if st.button('Predict Promotion'):
-    prediction = model.predict(input_data)
-    prediction = (prediction > 0.5).astype(int)
-    
+    prediction_prob = model.predict(input_data)
+    prediction = (prediction_prob > 0.5).astype(int)
+
     if prediction == 1:
         st.success("The employee is likely to be promoted.")
     else:
         st.warning("The employee is not likely to be promoted.")
 
-    # Calculate accuracy if true label is known (for demo, assume it's 1 or 0)
-    # true_label = st.selectbox('True Label (for calculating accuracy)', [1, 0])  # Optional
-    # accuracy = accuracy_score([true_label], prediction)
-    # st.write(f"Prediction Accuracy: {accuracy:.2f}")
+    # Optional: Collect true label for accuracy calculation
+    true_label = st.selectbox('True Label (for calculating accuracy)', [1, 0], index=1)  # Default to 0
+    accuracy = accuracy_score([true_label], prediction)
+    st.write(f"Prediction Accuracy: {accuracy:.2f}")
