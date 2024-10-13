@@ -3,12 +3,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Input
+from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
-import numpy as np
 
 # Load dataset (replace these paths with actual file paths or upload feature in streamlit)
 train_data = pd.read_csv('employee_train.csv')
@@ -33,14 +30,10 @@ col = ['department', 'region', 'education', 'gender', 'recruitment_channel', 'no
 train_data_x = train_data[col]
 train_data_y = train_data['is_promoted']
 
-# Split the data into training and testing sets
-X_train, X_val, y_train, y_val = train_test_split(train_data_x, train_data_y, test_size=0.2, random_state=42)
-
 # Build the Neural Network model
 def build_model():
     model = Sequential()
-    model.add(Input(shape=(11,)))  # Use Input layer here
-    model.add(Dense(8, activation='relu'))
+    model.add(Dense(8, input_shape=(11,), activation='relu'))
     model.add(Dropout(0.3))
     model.add(Dense(1, activation='sigmoid'))
     
@@ -48,15 +41,7 @@ def build_model():
     model.compile(optimizer=adam, loss='binary_crossentropy', metrics=['accuracy'])
     return model
 
-# Train the model
 model = build_model()
-model.fit(X_train, y_train, epochs=10, batch_size=32, verbose=0)
-
-# Evaluate the model on validation data
-y_val_pred_prob = model.predict(X_val)
-y_val_pred = np.round(y_val_pred_prob)  # Convert probabilities to binary predictions
-val_accuracy = accuracy_score(y_val, y_val_pred)
-st.write(f"Validation Accuracy: {val_accuracy:.2f}")
 
 # Streamlit app
 st.title("Employee Promotion Prediction")
@@ -113,15 +98,9 @@ input_data = pd.DataFrame({
 
 # Predict promotion
 if st.button('Predict Promotion'):
-    prediction_prob = model.predict(input_data)
-    prediction = (prediction_prob > 0.5).astype(int)
-
+    prediction = model.predict(input_data)
+    prediction = (prediction > 0.5).astype(int)
     if prediction == 1:
         st.success("The employee is likely to be promoted.")
     else:
         st.warning("The employee is not likely to be promoted.")
-
-    # Optional: Collect true label for accuracy calculation
-    true_label = st.selectbox('True Label (for calculating accuracy)', [1, 0], index=1)  # Default to 0
-    accuracy = accuracy_score([true_label], prediction)
-    st.write(f"Prediction Accuracy: {accuracy:.2f}")
